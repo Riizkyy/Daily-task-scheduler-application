@@ -1,0 +1,181 @@
+.MODEL SMALL
+.CODE
+ORG 100H
+JMP MULAI
+
+; VARIABEL
+nama          DB 0dh,0ah,0dh,0ah,"Masukkan nama anda: ", '$'
+id            DB 0dh,0ah,"Masukkan kartu ID anda: ", '$'
+psn1          DB "PROGRAM JADWAL HARIAN SEDERHANA",0dh,0ah,"-----------------------------",'$'
+welcome_msg   DB 0dh,0ah,0dh,0ah,"SELAMAT DATANG DI JADWAL HARIAN SEDERHANA ", '$'
+prompt_day    DB 0dh,0ah,"HARI APA YANG ANDA PILIH: ",0dh,0ah
+DB "========================",0dh,0ah
+DB "=      1.SENIN        =",0dh,0ah
+DB "=      2.SELASA       =",0dh,0ah
+DB "=      3.RABU         =",0dh,0ah
+DB "=      4.KAMIS        =",0dh,0ah
+DB "=      5.JUMAT        =",0dh,0ah
+DB "=      6.SABTU        =",0dh,0ah
+DB "=      7.MINGGU       =",0dh,0ah
+DB "========================",0dh,0ah
+DB 0dh,0ah, 'Hari apa yang ingin dijadwalkan? $'
+success_msg   DB 0dh,0ah, 'Selamat mengisi jadwal... $'
+thank_you_msg DB 0dh,0ah, "Terimakasih telah menggunakan aplikasi Jadwal Harian", '$'
+continue_msg  DB 0dh,0ah, "Ingin jadwal lainnya? (Y/N)", '$'
+error_msg     DB 0dh,0ah, "Masukkan kode yang benar!", '$'
+
+tampung_nama  DB 30, ?, 30 dup(?)
+tampung_id    DB 30, ?, 30 dup(?)
+selected_day  DB 0
+
+
+input_activity DB 13,10,'Masukkan aktivitas untuk hari ini: $'
+tampung_activity DB 30,0
+
+MULAI:
+LEA DX, psn1
+MOV AH, 9
+INT 21H
+
+LEA DX, nama
+MOV AH, 9
+INT 21H
+
+MOV AH, 0AH
+LEA DX, tampung_nama
+INT 21H
+PUSH DX
+
+LEA DX, id
+MOV AH, 9
+INT 21H
+
+MOV AH, 0AH
+LEA DX, tampung_id
+INT 21H
+PUSH DX
+
+LEA DX, welcome_msg
+MOV AH, 9
+INT 21H
+
+MULAI2:
+LEA DX, prompt_day
+MOV AH, 9
+INT 21H
+
+proses:
+MOV AH, 01
+INT 21H
+
+CMP AL, '1'
+JE SENIN
+
+CMP AL, '2'
+JE SELASA
+
+CMP AL, '3'
+JE RABU
+
+CMP AL, '4'
+JE KAMIS
+
+CMP AL, '5'
+JE JUMAT
+
+CMP AL, '6'
+JE SABTU
+
+CMP AL, '7'
+JE MINGGU
+
+JMP psn_eror
+
+psn_eror:
+LEA DX, error_msg
+MOV AH, 9
+INT 21H
+INT 20H
+JMP EXIT
+
+psn2:
+LEA DX, continue_msg
+MOV AH, 9
+INT 21H
+MOV AH, 01
+INT 21H
+
+CMP AL, 'Y'
+JE jadwal_lagi
+
+CMP AL, 'N'
+JE jadwal_selesai
+
+JMP psn_eror
+
+SENIN:
+MOV selected_day, 1
+JMP proses2
+
+SELASA:
+MOV selected_day, 2
+JMP proses2
+
+RABU:
+MOV selected_day, 3
+JMP proses2
+
+KAMIS:
+MOV selected_day, 4
+JMP proses2
+
+JUMAT:
+MOV selected_day, 5
+JMP proses2
+
+SABTU:
+MOV selected_day, 6
+JMP proses2
+
+MINGGU:
+MOV selected_day, 7
+JMP proses2
+
+proses2:
+LEA DX, success_msg
+MOV AH, 9
+INT 21H
+
+
+LEA DX, input_activity
+MOV AH, 09h
+INT 21H
+
+MOV AH, 0Ah
+LEA DX,  tampung_activity
+INT 21H
+
+; Display the saved activities
+LEA DX, tampung_activity
+MOV AH, 09h
+INT 21H
+
+JMP jadwal_selesai
+
+jadwal_lagi:
+JMP MULAI2
+
+jadwal_selesai:
+LEA DX, thank_you_msg
+MOV AH, 9
+INT 21H
+INT 20H
+
+
+JMP EXIT
+EXIT:
+RET
+
+
+
+; [SOURCE]: C:\emu8086\MySource\mycodeee.asm
